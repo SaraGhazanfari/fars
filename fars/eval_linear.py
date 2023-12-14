@@ -171,8 +171,8 @@ class LinearEvaluation:
 
             # forward
             with torch.no_grad():
-                output = self.model(inp)
-            output = self.linear_classifier(output)[:, :768]
+                output = self.model(inp)[:, :768]
+            output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
 
             # if self.linear_classifier.module.num_labels >= 5:
