@@ -32,11 +32,12 @@ class DataAugmentationDINO:
         ])
 
     def __call__(self, image):
-        images = []
-        images.append(self.standard_transform(image))
-        images.append(self.global_transfo1(image))
-        images = torch.stack(images, dim=0)
-        return images
+        return self.standard_transform(image)
+        # images = []
+        # images.append(self.standard_transform(image))
+        # images.append(self.global_transfo1(image))
+        # images = torch.stack(images, dim=0)
+        # return images
 
 
 class BaseReader:

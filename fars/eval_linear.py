@@ -129,8 +129,6 @@ class LinearEvaluation:
         # header = 'Epoch: [{}]'.format(epoch)
         for idx, (inp, target) in tqdm(enumerate(self.train_loader)):
 
-            # move to gpu
-            inp = inp[:, 0, :, :, :].squeeze(1)
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
 
