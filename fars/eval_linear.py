@@ -124,7 +124,7 @@ class LinearEvaluation:
         self._save_ckpt(step=1, epoch=self.config.epochs, final=True)
 
     def train(self, epoch):
-        self.evaluate(self)()
+        self.evaluate()
         self.linear_classifier.train()
         self.metric_logger = utils.MetricLogger(delimiter="  ")
         self.metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
