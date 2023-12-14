@@ -11,7 +11,6 @@ from fars.core import utils
 from fars.core.data.readers import readers_config
 from fars.core.models.dino.model import LinearClassifier
 from fars.core.models.l2_lip.model import L2LipschitzNetwork, NormalizedModel
-from fars.core.utils import N_CLASSES
 
 
 class LinearEvaluation:
@@ -20,15 +19,8 @@ class LinearEvaluation:
         self.train_dir = self.config.train_dir
 
     def _init_class_properties(self):
-        # job_env = submitit.JobEnvironment()
-        self.rank = 0  # int(job_env.global_rank)
-        self.local_rank = 0  # int(job_env.local_rank)
-        self.num_nodes = 1  # int(job_env.num_nodes)
-        self.num_tasks = 1  # int(job_env.num_tasks)
-        self.is_master = True  # bool(self.rank == 0)
-        self.ngpus = torch.cuda.device_count()
-        self.world_size = self.num_nodes * self.ngpus
-        self.embed_dim = N_CLASSES[self.config.teacher_model_name]
+        self.is_master = True
+        self.embed_dim = 1792
 
         means = (0.0000, 0.0000, 0.0000)
         stds = (1.0000, 1.0000, 1.0000)
@@ -56,7 +48,7 @@ class LinearEvaluation:
         print(f"Linear model built.")
 
         self.linear_classifier = DataParallel(
-            self.linear_classifier, device_ids=[self.local_rank], output_device=self.local_rank)
+            self.linear_classifier, device_ids=range(torch.cuda.device_count()))
         # utils.load_pretrained_dino_linear_weights(self.linear_classifier)
         self.optimizer = torch.optim.SGD(
             self.linear_classifier.parameters(),
