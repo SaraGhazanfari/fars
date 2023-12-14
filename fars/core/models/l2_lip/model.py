@@ -59,8 +59,6 @@ class L2LipschitzNetwork(nn.Module):
     def forward(self, x):
         x = self.base(x)
         x = self.last(x)
-        if self.config.mode == 'ssa':
-            x = x / torch.norm(x, p=2, dim=(1)).unsqueeze(1)
         return x
 
 
