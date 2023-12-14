@@ -42,7 +42,7 @@ class LinearEvaluation:
         self.model = self.load_ckpt()
         self.model = self.model.eval()
 
-        self.linear_classifier = LinearClassifier(dim=768, num_labels=100)
+        self.linear_classifier = LinearClassifier(dim=768, num_labels=self.reader.n_classes)
         self.linear_classifier = DataParallel(self.linear_classifier, device_ids=range(torch.cuda.device_count()))
         self.linear_classifier = self.linear_classifier.cuda()
         print(f"Linear model built.")

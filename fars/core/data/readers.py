@@ -1,9 +1,7 @@
 import os
 from os.path import join, exists
 
-import torch
 from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
@@ -88,7 +86,7 @@ class ImagenetReader(BaseReader):
         self.config = config
         self.batch_size = batch_size
         self.is_training = is_training
-        self.n_classes = 768
+        self.n_classes = 1000
         self.height, self.width = 224, 500
         self.n_train_files = 1_281_167
         self.n_test_files = 50_000
@@ -120,9 +118,20 @@ class Imagenet100Reader(ImagenetReader):
             config, batch_size, is_distributed, is_training)
         self.n_train_files = 130_301
         self.n_test_files = 5_301
+        self.n_classes = 100
+
+
+class Imagenet10Reader(ImagenetReader):
+    def __init__(self, config, batch_size, is_training, is_distributed=False):
+        super(Imagenet10Reader, self).__init__(
+            config, batch_size, is_distributed, is_training)
+        self.n_train_files = 9469
+        self.n_test_files = 3925
+        self.n_classes = 10
 
 
 readers_config = {
     'imagenet': ImagenetReader,
     'imagenet100': Imagenet100Reader,
+    'imagenette': Imagenet10Reader,
 }
