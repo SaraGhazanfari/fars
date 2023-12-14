@@ -1,10 +1,8 @@
 import argparse
 import os
-import shutil
 import sys
 import warnings
-from datetime import datetime
-from os.path import exists, realpath
+from os.path import realpath
 
 from fars.eval_linear import LinearEvaluation
 
@@ -35,27 +33,9 @@ def set_config(config):
     # cluster constraint
 
     # process argments
-
-    if config.data_dir is None:
-        config.data_dir = os.environ.get('DATADIR', None)
-    if config.data_dir is None:
-        ValueError("the following arguments are required: --data_dir")
     os.makedirs('./trained_models', exist_ok=True)
     path = realpath('./trained_models')
-    if config.mode == 'train' and config.train_dir is None:
-        config.start_new_model = True
-        folder = datetime.now().strftime("%Y-%m-%d_%H.%M.%S_%f")[:-2]
-        if config.debug:
-            folder = 'folder_debug'
-            if exists(f'{path}/folder_debug'):
-                shutil.rmtree(f'{path}/folder_debug')
-        config.train_dir = f'{path}/{folder}'
-        os.makedirs(config.train_dir)
-        os.makedirs(f'{config.train_dir}/checkpoints')
-    elif config.mode in ['train', 'finetune'] and config.train_dir is not None:
-        config.start_new_model = False
-        config.train_dir = f'{path}/{config.train_dir}'
-        assert exists(config.train_dir)
+    config.train_dir = f'{path}/{config.train_dir}'
 
     return config
 
