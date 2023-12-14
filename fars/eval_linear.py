@@ -124,10 +124,12 @@ class LinearEvaluation:
         self._save_ckpt(step=1, epoch=self.config.epochs, final=True)
 
     def train(self, epoch):
+        self.evaluate(self)()
         self.linear_classifier.train()
+        self.metric_logger = utils.MetricLogger(delimiter="  ")
         self.metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-        # header = 'Epoch: [{}]'.format(epoch)
-        for idx, (inp, target) in tqdm(enumerate(self.train_loader)):
+        header = 'Epoch: [{}]'.format(epoch)
+        for idx, (inp, target) in tqdm(enumerate(self.metric_logger.log_every(self.train_loader, 1, header))):
 
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
@@ -152,8 +154,8 @@ class LinearEvaluation:
 
             # log
             torch.cuda.synchronize()
-            # self.metric_logger.update(loss=loss.item())
-            # self.metric_logger.update(lr=self.optimizer.param_groups[0]["lr"])
+            self.metric_logger.update(loss=loss.item())
+            self.metric_logger.update(lr=self.optimizer.param_groups[0]["lr"])
         # gather the stats from all processes
         # self.metric_logger.synchronize_between_processes()
         # print("Averaged stats:", self.metric_logger)
