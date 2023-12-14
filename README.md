@@ -1,1 +1,1 @@
-# fars
+# FaRS: Fast Randomized Smoothing
