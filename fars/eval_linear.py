@@ -52,7 +52,7 @@ class LinearEvaluation:
         # utils.load_pretrained_dino_linear_weights(self.linear_classifier)
         self.optimizer = torch.optim.SGD(
             self.linear_classifier.parameters(),
-            self.config.lr * self.config.batch_size,  # linear scaling rule
+            0.01,  # self.config.lr * self.config.batch_size,  # linear scaling rule
             momentum=0.9,
             weight_decay=0,  # we do not apply weight decay
         )
@@ -146,7 +146,7 @@ class LinearEvaluation:
             # compute the gradients
             self.optimizer.zero_grad()
             loss.backward()
-            if idx % 10 == 9:
+            if idx % 100 == 99:
                 print(
                     f'Epoch: {epoch + 1}, iteration: {idx + 1}/{len(self.train_loader)}, Loss: {round(loss.item(), 4)}')
             # step
