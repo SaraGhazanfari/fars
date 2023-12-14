@@ -68,8 +68,6 @@ class BaseReader:
     def load_dataset(self):
         """Load or download dataset."""
         sampler = None
-        if self.is_distributed:
-            sampler = DistributedSampler(self.dataset, shuffle=self.is_training)
 
         loader = DataLoader(self.dataset,
                             batch_size=self.batch_size,
