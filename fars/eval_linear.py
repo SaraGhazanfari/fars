@@ -102,26 +102,13 @@ class LinearEvaluation:
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, self.config.epochs, eta_min=0)
 
         for epoch in range(0, self.config.epochs):
-            train_stats = self.train(epoch)
+            self.train(epoch)
             scheduler.step()
             self.evaluate()
-            # log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-            #              'epoch': epoch}
-            # if epoch % self.config.frequency_log_steps == 0 or epoch == self.config.epochs - 1:
-            #     test_stats = self.evaluate()
-            #     print(
-            #         f"Accuracy at epoch {epoch} of the network on the test images: {test_stats['acc1']:.1f}%")
-            #     best_acc = max(best_acc, test_stats["acc1"])
-            #     print(f'Max accuracy so far: {best_acc:.2f}%')
-            #     log_stats = {**{k: v for k, v in log_stats.items()},
-            #                  **{f'test_{k}': v for k, v in test_stats.items()}}
-
-            # with (Path(self.train_dir) / "log.txt").open("a") as f:
-            #     f.write(json.dumps(log_stats) + "\n")
-            self._save_ckpt(step=1, epoch=epoch)
+            self._save_ckpt(step=epoch, epoch=epoch)
         print("Training of the supervised linear classifier on frozen features completed.\n"
               "Top-1 test accuracy: {acc:.1f}".format(acc=best_acc))
-        self._save_ckpt(step=1, epoch=self.config.epochs, final=True)
+        self._save_ckpt(step=self.config.epochs, epoch=self.config.epochs, final=True)
 
     def train(self, epoch):
         self.evaluate()
