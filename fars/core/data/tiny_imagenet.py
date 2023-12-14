@@ -27,7 +27,7 @@ class TinyImageNet(VisionDataset):
     def __init__(self, root, split='train', transform=None, target_transform=None, download=False):
         super(TinyImageNet, self).__init__(root, transform=transform, target_transform=target_transform)
 
-        self.dataset_path = root #os.path.join(root, self.base_folder)
+        self.dataset_path = root  # os.path.join(root, self.base_folder)
         self.loader = default_loader
         self.split = verify_str_arg(split, "split", ("train", "val",))
 

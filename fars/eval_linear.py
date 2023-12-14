@@ -1,20 +1,16 @@
 import glob
-import json
 from os.path import join, exists
-from pathlib import Path
 
-import submitit
 import torch
-from torch import nn
 import torch.backends.cudnn as cudnn
+from torch import nn
 from torch.nn import DataParallel
 from tqdm import tqdm
 
 from fars.core import utils
 from fars.core.data.readers import readers_config
 from fars.core.models.dino.model import LinearClassifier
-from fars.core.models.l2_lip.model import L2LipschitzNetworkV2
-from fars.core.models.l2_lip.model import NormalizedModel
+from fars.core.models.l2_lip.model import L2LipschitzNetwork, NormalizedModel
 from fars.core.utils import N_CLASSES
 
 
@@ -45,7 +41,7 @@ class LinearEvaluation:
         self.train_loader, self.train_sampler = Reader(config=self.config, batch_size=self.config.batch_size,
                                                        is_training=True, is_distributed=False).load_dataset()
 
-        model = L2LipschitzNetworkV2(self.config, self.embed_dim)
+        model = L2LipschitzNetwork(self.config, self.embed_dim)
         self.model = NormalizedModel(model, means, stds)
         self.model = self.model.cuda()
         # utils.setup_distributed_training(self.world_size, self.rank)

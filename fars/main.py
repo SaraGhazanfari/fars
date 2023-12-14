@@ -1,12 +1,12 @@
+import argparse
 import os
 import shutil
 import sys
 import warnings
-import argparse
 from datetime import datetime
 from os.path import exists, realpath
-from fars.eval_linear import LinearEvaluation
 
+from fars.eval_linear import LinearEvaluation
 
 warnings.filterwarnings("ignore")
 

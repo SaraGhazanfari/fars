@@ -26,4 +26,3 @@ class LipSimConfig:
     account = ''
     timeout = 1
     requires_bias = False
-    

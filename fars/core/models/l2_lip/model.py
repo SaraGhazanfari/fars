@@ -3,10 +3,12 @@ import logging
 import torch
 import torch.nn as nn
 from torch.nn.init import trunc_normal_
+from torchvision.transforms import Normalize
 
 from fars.core import utils
 from fars.core.models.l2_lip.layers import SDPBasedLipschitzConvLayer, SDPBasedLipschitzLinearLayer
 from fars.core.models.l2_lip.layers import SDPConvLin, SDPLin
+
 
 class NormalizedModel(nn.Module):
     def __init__(self, model, mean, std):
@@ -16,6 +18,8 @@ class NormalizedModel(nn.Module):
 
     def forward(self, x):
         return self.model(self.normalize(x))
+
+
 class L2LipschitzNetwork(nn.Module):
 
     def __init__(self, config, n_classes):

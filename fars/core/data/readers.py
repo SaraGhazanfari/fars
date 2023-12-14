@@ -1,12 +1,11 @@
 import os
+from os.path import join, exists
 
 import torch
-from os.path import join, exists
-from torchvision import transforms
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-
-from torchvision.datasets import ImageNet, ImageFolder
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
 
 
 class DataAugmentationDINO:
