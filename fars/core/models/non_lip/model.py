@@ -17,7 +17,7 @@ class LinearClassifier(nn.Module):
             linear_layers.append(nn.Linear(dim, 1000))
             linear_layers.append(nn.ReLU())
             linear_layers.append(nn.Linear(1000, num_labels))
-            linear_layers[-1].data.normal_(mean=0.0, std=0.01)
+            linear_layers[-1].weight.data.normal_(mean=0.0, std=0.01)
             linear_layers[-1].bias.data.zero_()
             self.linear = nn.Sequential(*linear_layers)
 
