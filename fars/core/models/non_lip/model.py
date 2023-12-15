@@ -15,7 +15,9 @@ class LinearClassifier(nn.Module):
         else:
             linear_layers = list()
             linear_layers.append(nn.Linear(dim, 1000))
-            linear_layers.append(nn.ReLU())
+            linear_layers[-1].weight.data.normal_(mean=0.0, std=0.01)
+            linear_layers[-1].bias.data.zero_()
+            linear_layers.append(nn.Sigmoid())
             linear_layers.append(nn.Linear(1000, num_labels))
             linear_layers[-1].weight.data.normal_(mean=0.0, std=0.01)
             linear_layers[-1].bias.data.zero_()
