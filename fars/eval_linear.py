@@ -175,11 +175,6 @@ class LinearEvaluation:
 
             correct_counts += sum(torch.argmax(output, dim=1) == target)
             total += inp.shape[0]
-            print('******************************')
-            print(output)
-            print(target)
-            print(correct_counts)
-            print(total)
-            print(torch.argmax(output))
-            print('******************************')
+
+        print(f'Total Acc on val data: {round(correct_counts/total, 4)}')
 
