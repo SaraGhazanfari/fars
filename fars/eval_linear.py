@@ -1,4 +1,5 @@
 import glob
+import os.path
 from os.path import join, exists
 
 import torch
@@ -17,6 +18,7 @@ class LinearEvaluation:
     def __init__(self, config):
         self.config = config
         self.train_dir = self.config.train_dir
+        self.has_training = True
 
     def _init_class_properties(self):
         self.is_master = True
@@ -45,11 +47,17 @@ class LinearEvaluation:
         self.linear_classifier = LinearClassifier(dim=768, num_labels=self.reader.n_classes)
         self.linear_classifier = DataParallel(self.linear_classifier, device_ids=range(torch.cuda.device_count()))
         self.linear_classifier = self.linear_classifier.cuda()
+        classifier_checkpoint = join(self.config.train_dir, 'checkpoints', 'classifier-*.pth')
+        print('Linear model built.')
+        if os.path.exists(classifier_checkpoint):
+            self.linear_classifier = torch.load_state_dict(torch.load(classifier_checkpoint))
+            self.has_training = False
+            print('Linear classifier is loaded!')
         print(f"Linear model built.")
 
         self.linear_classifier = DataParallel(
             self.linear_classifier, device_ids=range(torch.cuda.device_count()))
-        # utils.load_pretrained_dino_linear_weights(self.linear_classifier)
+
         self.optimizer = torch.optim.SGD(
             self.linear_classifier.parameters(),
             0.01,  # self.config.lr * self.config.batch_size,  # linear scaling rule
@@ -96,22 +104,24 @@ class LinearEvaluation:
     def __call__(self):
         self._init_class_properties()
         print("\n".join("%s: %s" % (k, str(v)) for k, v in sorted(dict(vars(self.config)).items())))
-        cudnn.benchmark = True
-        self.saved_ckpts = set([0])
-        best_acc = 0
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, self.config.epochs, eta_min=0)
+        self.evaluate()
+        if self.has_training:
+            cudnn.benchmark = True
+            self.saved_ckpts = set([0])
+            best_acc = 0
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, self.config.epochs, eta_min=0)
 
-        for epoch in range(0, self.config.epochs):
-            self.train(epoch)
-            scheduler.step()
-            self.evaluate()
-            self._save_ckpt(step=epoch, epoch=epoch)
-        print("Training of the supervised linear classifier on frozen features completed.\n"
-              "Top-1 test accuracy: {acc:.1f}".format(acc=best_acc))
-        self._save_ckpt(step=self.config.epochs, epoch=self.config.epochs, final=True)
+            for epoch in range(0, self.config.epochs):
+                self.train(epoch)
+                scheduler.step()
+                self.evaluate()
+                self._save_ckpt(step=epoch, epoch=epoch)
+            print("Training of the supervised linear classifier on frozen features completed.\n"
+                  "Top-1 test accuracy: {acc:.1f}".format(acc=best_acc))
+            self._save_ckpt(step=self.config.epochs, epoch=self.config.epochs, final=True)
 
     def train(self, epoch):
-        self.evaluate()
+
         self.linear_classifier.train()
         self.metric_logger = utils.MetricLogger(delimiter="  ")
         self.metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -143,10 +153,6 @@ class LinearEvaluation:
             torch.cuda.synchronize()
             self.metric_logger.update(loss=loss.item())
             self.metric_logger.update(lr=self.optimizer.param_groups[0]["lr"])
-        # gather the stats from all processes
-        # self.metric_logger.synchronize_between_processes()
-        # print("Averaged stats:", self.metric_logger)
-        # return {k: meter.global_avg for k, meter in self.metric_logger.meters.items()}
 
     @torch.no_grad()
     def evaluate(self):
