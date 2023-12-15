@@ -173,9 +173,10 @@ class LinearEvaluation:
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
 
-            correct_counts += sum(torch.argmax(output) == target)
+            correct_counts += sum(torch.argmax(output, dim=1) == target)
             total += inp.shape[0]
             print('******************************')
+            print(target)
             print(correct_counts)
             print(total)
             print(torch.argmax(output))
