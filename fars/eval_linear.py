@@ -94,7 +94,7 @@ class LinearEvaluation:
             state = {
                 'epoch': epoch,
                 'global_step': step,
-                'model_state_dict': self.model.state_dict(),
+                'model_state_dict': self.linear_classifier.state_dict(),
                 'optimizer_state_dict': self.optimizer.state_dict(),
                 # 'scheduler': self.scheduler.state_dict()
             }
