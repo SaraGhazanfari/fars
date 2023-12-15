@@ -50,9 +50,6 @@ class LinearEvaluation:
         print('Linear model built.')
         self.load_classifier()
 
-        self.linear_classifier = DataParallel(
-            self.linear_classifier, device_ids=range(torch.cuda.device_count()))
-
         self.optimizer = torch.optim.SGD(
             self.linear_classifier.parameters(),
             0.01,  # self.config.lr * self.config.batch_size,  # linear scaling rule
@@ -102,7 +99,6 @@ class LinearEvaluation:
                 'global_step': step,
                 'model_state_dict': self.linear_classifier.state_dict(),
                 'optimizer_state_dict': self.optimizer.state_dict(),
-                # 'scheduler': self.scheduler.state_dict()
             }
             torch.save(state, ckpt_path)
 
@@ -155,15 +151,13 @@ class LinearEvaluation:
 
             # log
             torch.cuda.synchronize()
-            self.metric_logger.update(loss=loss.item())
-            self.metric_logger.update(lr=self.optimizer.param_groups[0]["lr"])
 
     @torch.no_grad()
     def evaluate(self):
         self.linear_classifier.eval()
         correct_counts = 0
         total = 0
-        for inp, target in self.val_loader:
+        for idx, (inp, target) in enumerate(self.val_loader):
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
 
@@ -175,5 +169,7 @@ class LinearEvaluation:
 
             correct_counts += sum(torch.argmax(output, dim=1) == target).item()
             total += inp.shape[0]
-        print(f'Total Acc on val data: {round(correct_counts/total, 4)}')
-
+            if idx % 10 == 9:
+                print(
+                    f'Iteration: {idx + 1}/{len(self.val_loader)}, acc: {round(correct_counts / total, 4)}')
+        print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
