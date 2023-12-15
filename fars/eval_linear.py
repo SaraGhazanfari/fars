@@ -9,8 +9,8 @@ from tqdm import tqdm
 
 from fars.core import utils
 from fars.core.data.readers import readers_config
-from fars.core.models.dino.model import LinearClassifier
 from fars.core.models.l2_lip.model import L2LipschitzNetwork, NormalizedModel
+from fars.core.models.non_lip.model import LinearClassifier
 
 
 class LinearEvaluation:
