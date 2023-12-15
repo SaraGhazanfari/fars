@@ -176,6 +176,7 @@ class LinearEvaluation:
             correct_counts += sum(torch.argmax(output, dim=1) == target)
             total += inp.shape[0]
             print('******************************')
+            print(output)
             print(target)
             print(correct_counts)
             print(total)
