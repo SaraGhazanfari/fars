@@ -173,8 +173,7 @@ class LinearEvaluation:
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
 
-            correct_counts += sum(torch.argmax(output, dim=1) == target)
+            correct_counts += sum(torch.argmax(output, dim=1) == target).item()
             total += inp.shape[0]
-
-        print(f'Total Acc on val data: {round(correct_counts.item()/total, 4)}')
+        print(f'Total Acc on val data: {round(correct_counts/total, 4)}')
 
