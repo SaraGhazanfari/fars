@@ -129,10 +129,8 @@ class LinearEvaluation:
     def train(self, epoch):
 
         self.linear_classifier.train()
-        self.metric_logger = utils.MetricLogger(delimiter="  ")
-        self.metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-        header = 'Epoch: [{}]'.format(epoch)
-        for idx, (inp, target) in tqdm(enumerate(self.metric_logger.log_every(self.train_loader, 1, header))):
+
+        for idx, (inp, target) in tqdm(enumerate(self.train_loader)):
 
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
@@ -163,10 +161,9 @@ class LinearEvaluation:
     @torch.no_grad()
     def evaluate(self):
         self.linear_classifier.eval()
-
+        correct_counts = 0
+        total = 0
         for inp, target in self.val_loader:
-            # self.val_sampler.set_epoch(0)
-            # move to gpu
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
 
@@ -176,20 +173,11 @@ class LinearEvaluation:
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
 
-            # if self.linear_classifier.module.num_labels >= 5:
-            #     acc1, acc5 = utils.accuracy(output, target, topk=(1, 5))
-            # else:
-            acc1, = utils.accuracy(output, target, topk=(1,))
+            correct_counts += sum(torch.argmax(output) == target)
+            total += inp.shape[0]
+            print('******************************')
+            print(correct_counts)
+            print(total)
+            print(torch.argmax(output))
+            print('******************************')
 
-            batch_size = inp.shape[0]
-            self.metric_logger.update(loss=loss.item())
-            self.metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
-            # if self.linear_classifier.module.num_labels >= 5:
-            #     self.metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
-        # if self.linear_classifier.module.num_labels >= 5:
-        #     print('* Acc@1 {top1.global_avg:.3f} Acc@5 {top5.global_avg:.3f} loss {losses.global_avg:.3f}'
-        #           .format(top1=self.metric_logger.acc1, top5=self.metric_logger.acc5, losses=self.metric_logger.loss))
-        # else:
-        print('* Acc@1 {top1.global_avg:.3f} loss {losses.global_avg:.3f}'
-              .format(top1=self.metric_logger.acc1, losses=self.metric_logger.loss))
-        return {k: meter.global_avg for k, meter in self.metric_logger.meters.items()}
