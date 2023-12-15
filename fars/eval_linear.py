@@ -167,7 +167,7 @@ class LinearEvaluation:
 
             correct_counts += sum(torch.argmax(output, dim=1) == target).item()
             total += inp.shape[0]
-            if idx % 10 == 9:
+            if idx % 20 == 19:
                 print(
                     f'Iteration: {idx + 1}/{len(self.val_loader)}, acc: {round(correct_counts / total, 4)}')
         print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
