@@ -1,5 +1,4 @@
 import glob
-import os.path
 from os.path import join, exists
 
 import torch
@@ -50,7 +49,8 @@ class LinearEvaluation:
         classifier_checkpoint = glob.glob(join(self.config.train_dir, 'checkpoints', 'classifier-*.pth'))
         print('Linear model built.')
         if len(classifier_checkpoint) != 0:
-            self.linear_classifier = self.linear_classifier.load_state_dict(torch.load(classifier_checkpoint[-1]))
+            self.linear_classifier = self.linear_classifier.load_state_dict(
+                torch.load(classifier_checkpoint[-1])['model_state_dict'])
             self.has_training = False
             print('Linear classifier is loaded!')
         print(f"Linear model built.")
