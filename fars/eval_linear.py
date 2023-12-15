@@ -47,10 +47,10 @@ class LinearEvaluation:
         self.linear_classifier = LinearClassifier(dim=768, num_labels=self.reader.n_classes)
         self.linear_classifier = DataParallel(self.linear_classifier, device_ids=range(torch.cuda.device_count()))
         self.linear_classifier = self.linear_classifier.cuda()
-        classifier_checkpoint = join(self.config.train_dir, 'checkpoints', 'classifier-*.pth')
+        classifier_checkpoint = glob.glob(join(self.config.train_dir, 'checkpoints', 'classifier-*.pth'))
         print('Linear model built.')
-        if os.path.exists(classifier_checkpoint):
-            self.linear_classifier = torch.load_state_dict(torch.load(classifier_checkpoint))
+        if len(classifier_checkpoint) != 0:
+            self.linear_classifier = torch.load_state_dict(torch.load(classifier_checkpoint[-1]))
             self.has_training = False
             print('Linear classifier is loaded!')
         print(f"Linear model built.")
