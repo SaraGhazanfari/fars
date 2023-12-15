@@ -43,7 +43,8 @@ class LinearEvaluation:
         self.model = self.load_ckpt()
         self.model = self.model.eval()
 
-        self.linear_classifier = LinearClassifier(dim=768, num_labels=self.reader.n_classes)
+        self.linear_classifier = LinearClassifier(dim=768, num_labels=self.reader.n_classes,
+                                                  num_layers=self.config.num_linear)
         self.linear_classifier = DataParallel(self.linear_classifier, device_ids=range(torch.cuda.device_count()))
         self.linear_classifier = self.linear_classifier.cuda()
         classifier_checkpoint = glob.glob(join(self.config.train_dir, 'checkpoints', 'classifier-*.pth'))

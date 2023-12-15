@@ -93,8 +93,7 @@ if __name__ == '__main__':
     parser.add_argument("--conv_size", type=int, default=5)
     parser.add_argument("--init", type=str, default='xavier_normal')
 
-    parser.add_argument("--first_layer", type=str, default="padding_channels")
-    parser.add_argument("--last_layer", type=str, default="pooling_linear")
+    parser.add_argument("--num_linear", type=int, default=1)
 
     # parse all arguments
     config = parser.parse_args()
