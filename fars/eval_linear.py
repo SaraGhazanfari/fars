@@ -64,8 +64,8 @@ class LinearEvaluation:
         modified_state_dict = dict()
         if len(classifier_checkpoint) != 0:
             state_dict = torch.load(classifier_checkpoint[-1])['model_state_dict']
-            for key, value in state_dict.items():
-                modified_state_dict[key.replace('module.', '')] = value
+            # for key, value in state_dict.items():
+            #     modified_state_dict[key.replace('module.', '')] = value
             msg = self.linear_classifier.load_state_dict(modified_state_dict, strict=False)
             self.has_training = False
             print(f'Linear classifier is loaded! {msg}')
