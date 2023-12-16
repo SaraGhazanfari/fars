@@ -177,7 +177,6 @@ class LinearEvaluation:
             # log
             torch.cuda.synchronize()
 
-    @torch.no_grad()
     def evaluate(self):
         self.linear_classifier.eval()
         correct_counts = 0
