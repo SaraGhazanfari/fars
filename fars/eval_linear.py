@@ -198,13 +198,13 @@ class LinearEvaluation:
                 with torch.no_grad():
                     output = self.model(inp)[:, :768]
                 output = self.linear_classifier(output)
-                correct_counts += sum(torch.argmax(output, dim=1)[0] == target)
+                correct_counts += sum(torch.argmax(output, dim=1)[0] == target).item()
 
             total += inp.shape[0]
-            if idx % 20 == 19:
-                print(
-                    f'Iteration: {idx + 1}/{len(self.val_loader)}, acc: {round(correct_counts / total, 4)}')
-                print(margin_dict)
+            # if idx % 20 == 19:
+            print(
+                f'Iteration: {idx + 1}/{len(self.val_loader)}, acc: {round(correct_counts / total, 4)}')
+            print(margin_dict)
 
         print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
         print({k: v / total for k, v in margin_dict.items()})
