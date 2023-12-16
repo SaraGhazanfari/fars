@@ -53,8 +53,8 @@ if __name__ == '__main__':
     parser.add_argument("--dataset", type=str, default='imagenet', help="Dataset to use")
 
     parser.add_argument("--epochs", type=int, default=100, help="Number of epochs for training.")
-    parser.add_argument("--loss", type=str, default="rmse", choices=['rmse', 'hinge', 'cross', 'byol'],
-                        help="Define the loss to use for training.")
+
+    parser.add_argument("--batch_size", type=int, default=32, help="Number of samples in each batch size.")
 
     parser.add_argument("--lr", type=float, default=0.01)
     parser.add_argument("--print_grad_norm", action='store_true', help="Print of the norm of the gradients")
