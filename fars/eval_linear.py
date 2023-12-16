@@ -171,7 +171,8 @@ class LinearEvaluation:
             for idx, one_output in enumerate(output):
                 if torch.argmax(one_output) == target[idx]:
                     correct_counts += 1
-                    margin_dict = {k: v + 1 for k, v in margin_dict.items() if (one_output[target] / norm_w) > float(k)}
+                    margin_dict = {k: v + 1 for k, v in margin_dict.items() if
+                                   (one_output[target[idx]] / norm_w) > float(k)}
 
             total += inp.shape[0]
             if idx % 20 == 19:
