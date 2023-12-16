@@ -184,7 +184,7 @@ class LinearEvaluation:
         margin_dict = {'0.05': 0, '0.1': 0, '0.2': 0, '0.3': 0, '0.4': 0, '0.5': 0}
         norm_w = torch.linalg.matrix_norm(self.linear_classifier._modules['module'].linear.weight, ord=2)
 
-        for idx, (inp, target) in enumerate(self.val_loader):
+        for idx, (inp, target) in tqdm(enumerate(self.val_loader)):
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
 
