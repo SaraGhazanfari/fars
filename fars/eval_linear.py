@@ -1,16 +1,26 @@
 import glob
 from os.path import join, exists
 
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
+from advertorch.attacks import L2PGDAttack
 from torch import nn
 from torch.nn import DataParallel
 from tqdm import tqdm
-import numpy as np
+
 from fars.core import utils
 from fars.core.data.readers import readers_config
 from fars.core.models.l2_lip.model import L2LipschitzNetwork, NormalizedModel
-from fars.core.models.non_lip.model import LinearClassifier
+from fars.core.models.non_lip.model import LinearClassifier, WholeModel
+
+
+def pgd_l2_attack(eps, img_ref, y, target_model):
+    adversary = L2PGDAttack(target_model, eps=eps, nb_iter=100,
+                            eps_iter=0.01, rand_init=True, clip_min=0., clip_max=1., targeted=False)
+    img_ref = adversary(img_ref, y)
+
+    return img_ref
 
 
 def r_sparsemax(z, r=1):
@@ -52,16 +62,19 @@ class LinearEvaluation:
         self.model = NormalizedModel(model, means, stds)
         self.model = self.model.cuda()
         # utils.setup_distributed_training(self.world_size, self.rank)
+
         self.model = DataParallel(self.model, device_ids=range(torch.cuda.device_count()))
 
         self.model = self.load_ckpt()
         self.model = self.model.eval()
-
         self.linear_classifier = LinearClassifier(dim=768, num_labels=self.reader.n_classes,
                                                   num_layers=self.config.num_linear)
         self.linear_classifier = DataParallel(self.linear_classifier, device_ids=range(torch.cuda.device_count()))
         self.linear_classifier = self.linear_classifier.cuda()
         print('Linear model built.')
+
+        self.whole_model = WholeModel(backbone=self.model, linear_classifier=self.linear_classifier)
+
         self.load_classifier()
 
         self.optimizer = torch.optim.SGD(
@@ -176,19 +189,17 @@ class LinearEvaluation:
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
 
-            # forward
-            with torch.no_grad():
-                output = self.model(inp)[:, :768]
-            output = self.linear_classifier(output)
-
-            for local_idx, one_output in enumerate(output):
-                if self.config.simplex == 'sparsemax':
-                    one_output = r_sparsemax(one_output, r=2)
-                if torch.argmax(one_output) == target[local_idx]:
-                    correct_counts += 1
-                    for k, v in margin_dict.items():
-                        if one_output[target[local_idx]] / norm_w > float(k):
-                            margin_dict[k] = v + 1
+            if not self.config.attack:
+                with torch.no_grad():
+                    output = self.model(inp)[:, :768]
+                output = self.linear_classifier(output)
+                correct_counts = self.certified_eval(correct_counts, margin_dict, norm_w, output, target)
+            else:
+                inp = pgd_l2_attack(eps=self.config.eps, img_ref=inp, y=target, target_model=self.whole_model)
+                with torch.no_grad():
+                    output = self.model(inp)[:, :768]
+                output = self.linear_classifier(output)
+                correct_counts += sum(torch.argmax(output, dim=1)[0] == target)
 
             total += inp.shape[0]
             if idx % 20 == 19:
@@ -198,3 +209,14 @@ class LinearEvaluation:
 
         print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
         print({k: v / total for k, v in margin_dict.items()})
+
+    def certified_eval(self, correct_counts, margin_dict, norm_w, output, target):
+        for local_idx, one_output in enumerate(output):
+            if self.config.simplex == 'sparsemax':
+                one_output = r_sparsemax(one_output, r=2)
+            if torch.argmax(one_output) == target[local_idx]:
+                correct_counts += 1
+                for k, v in margin_dict.items():
+                    if one_output[target[local_idx]] / norm_w > float(k):
+                        margin_dict[k] = v + 1
+        return correct_counts

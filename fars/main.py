@@ -63,11 +63,8 @@ if __name__ == '__main__':
     parser.add_argument("--save_checkpoint_epochs", type=int, default=1, help="Save checkpoint every epoch.")
 
     # specific parameters for eval
-    # parser.add_argument("--attack", type=str,
-    #                     choices=['PGD-L2', 'PGD-Linf', 'PGD-L1', 'AA-L2', 'AA-Linf', 'CW-L2', 'CW-Linf', 'SQ-Linf',
-    #                              'SQ-L2', 'DF-L2', 'MI-L2', 'MI-Linf'],
-    #                     help="Choose the attack.")
-    # parser.add_argument("--eps", type=float, default=36)
+    parser.add_argument("--attack", type=bool)
+    parser.add_argument("--eps", type=float, default=0.05)
 
     # parameters of the architectures
     parser.add_argument("--model-name", type=str, default='small')

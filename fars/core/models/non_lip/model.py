@@ -1,6 +1,18 @@
 from torch import nn
 
 
+class WholeModel(nn.Module):
+    def __init__(self, backbone, linear_classifier):
+        super(WholeModel, self).__init__()
+        self.backbone = backbone
+        self.linear_classifier = linear_classifier
+
+    def forward(self, x):
+        x = self.backbone(x)[, :768]
+        x = self.linear_classifier(x)
+        return x
+
+
 class LinearClassifier(nn.Module):
     """Linear layer to train on top of frozen features"""
 
