@@ -164,8 +164,7 @@ class LinearEvaluation:
                 output = self.model(inp)[:, :768]
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
-            print(self.linear_classifier._modules['module'].linear)
-            print(self.linear_classifier._modules['module'].linear.weights.shape)
+            print(self.linear_classifier._modules['module'].linear.weight.shape)
             for one_output in output:
                 temp_scores = torch.sort(one_output, descending=True)[0]
                 print(temp_scores[0]-temp_scores[1])
