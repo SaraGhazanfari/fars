@@ -52,37 +52,22 @@ if __name__ == '__main__':
     parser.add_argument("--data_dir", type=str, help="Name of the data directory.")
     parser.add_argument("--dataset", type=str, default='imagenet', help="Dataset to use")
 
-    parser.add_argument("--shift_data", type=bool, default=True, help="Shift dataset with mean.")
-    parser.add_argument("--normalize_data", action='store_true', help="Normalize dataset.")
-
     parser.add_argument("--epochs", type=int, default=100, help="Number of epochs for training.")
     parser.add_argument("--loss", type=str, default="rmse", choices=['rmse', 'hinge', 'cross', 'byol'],
                         help="Define the loss to use for training.")
-    parser.add_argument("--optimizer", type=str, default='adam')
-    parser.add_argument("--scheduler", type=str, default="interp")
+
     parser.add_argument("--lr", type=float, default=0.01)
-    parser.add_argument("--beta1", type=float, default=0.5)
-    parser.add_argument("--beta2", type=float, default=0.9)
-    parser.add_argument("--wd", type=float, default=0, help="Weight decay to use for training.")
-    parser.add_argument("--nesterov", action='store_true', default=False)
-    parser.add_argument("--warmup_scheduler", type=float, default=0., help="Percentage of training.")
-    parser.add_argument("--decay", type=str, help="Milestones for MultiStepLR")
-    parser.add_argument("--gamma", type=float, help="Gamma for MultiStepLR")
-    parser.add_argument("--gradient_clip_by_norm", type=float, default=None)
-    parser.add_argument("--gradient_clip_by_value", type=float, default=None)
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--seed", type=int, help="Make the training deterministic.")
     parser.add_argument("--print_grad_norm", action='store_true', help="Print of the norm of the gradients")
     parser.add_argument("--frequency_log_steps", type=int, default=100, help="Print log for every step.")
     parser.add_argument("--logging_verbosity", type=str, default='INFO', help="Level of verbosity of the logs")
     parser.add_argument("--save_checkpoint_epochs", type=int, default=1, help="Save checkpoint every epoch.")
 
     # specific parameters for eval
-    parser.add_argument("--attack", type=str,
-                        choices=['PGD-L2', 'PGD-Linf', 'PGD-L1', 'AA-L2', 'AA-Linf', 'CW-L2', 'CW-Linf', 'SQ-Linf',
-                                 'SQ-L2', 'DF-L2', 'MI-L2', 'MI-Linf'],
-                        help="Choose the attack.")
-    parser.add_argument("--eps", type=float, default=36)
+    # parser.add_argument("--attack", type=str,
+    #                     choices=['PGD-L2', 'PGD-Linf', 'PGD-L1', 'AA-L2', 'AA-Linf', 'CW-L2', 'CW-Linf', 'SQ-Linf',
+    #                              'SQ-L2', 'DF-L2', 'MI-L2', 'MI-Linf'],
+    #                     help="Choose the attack.")
+    # parser.add_argument("--eps", type=float, default=36)
 
     # parameters of the architectures
     parser.add_argument("--model-name", type=str, default='small')
@@ -94,6 +79,7 @@ if __name__ == '__main__':
     parser.add_argument("--init", type=str, default='xavier_normal')
 
     parser.add_argument("--num_linear", type=int, default=1)
+    parser.add_argument("--simplex", type=str, default='argmax')
 
     # parse all arguments
     config = parser.parse_args()

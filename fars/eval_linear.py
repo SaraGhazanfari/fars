@@ -13,15 +13,15 @@ from fars.core.models.l2_lip.model import L2LipschitzNetwork, NormalizedModel
 from fars.core.models.non_lip.model import LinearClassifier
 
 
-def sparsemax(z):
+def r_sparsemax(z, r=1):
     sum_all_z = sum(z)
     z_sorted = sorted(z, reverse=True)
     k = np.arange(len(z))
-    k_array = 1 + k * z_sorted
+    k_array = r + k * z_sorted
     z_cumsum = np.cumsum(z_sorted) - z_sorted
     k_selected = k_array > z_cumsum
     k_max = np.where(k_selected)[0].max() + 1
-    threshold = (z_cumsum[k_max - 1] - 1) / k_max
+    threshold = (z_cumsum[k_max - 1] - r) / k_max
     return np.maximum(z - threshold, 0)
 
 
@@ -178,15 +178,14 @@ class LinearEvaluation:
             with torch.no_grad():
                 output = self.model(inp)[:, :768]
             output = self.linear_classifier(output)
-            loss = nn.CrossEntropyLoss()(output, target)
 
             for local_idx, one_output in enumerate(output):
+                if self.config.simplex == 'sparsemax':
+                    one_output = r_sparsemax(one_output, r=2)
                 if torch.argmax(one_output) == target[local_idx]:
-                    sorted_output = torch.sort(one_output)[0]
                     correct_counts += 1
-                    margin = (sorted_output[0] - sorted_output[1]) / norm_w
                     for k, v in margin_dict.items():
-                        if margin > float(k):
+                        if one_output[target[local_idx]] / norm_w > float(k):
                             margin_dict[k] = v + 1
 
             total += inp.shape[0]
