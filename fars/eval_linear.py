@@ -164,8 +164,10 @@ class LinearEvaluation:
                 output = self.model(inp)[:, :768]
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
+            print(self.linear_classifier.weight)
             for one_output in output:
-                print(torch.sort(one_output, descending=True)[:2])
+                temp_scores = torch.sort(one_output, descending=True)[0]
+                print(temp_scores[0]-temp_scores[1])
             correct_counts += sum(torch.argmax(output, dim=1) == target).item()
             total += inp.shape[0]
             if idx % 20 == 19:
