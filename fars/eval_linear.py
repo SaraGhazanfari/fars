@@ -169,7 +169,7 @@ class LinearEvaluation:
 
             for one_output in output:
                 temp_scores = torch.sort(one_output, descending=True)[0]
-                print((temp_scores[0] - temp_scores[1])/norm_w)
+                print((temp_scores[0])/norm_w)
             correct_counts += sum(torch.argmax(output, dim=1) == target).item()
             total += inp.shape[0]
             if idx % 20 == 19:
