@@ -8,7 +8,7 @@ class WholeModel(nn.Module):
         self.linear_classifier = linear_classifier
 
     def forward(self, x):
-        x = self.backbone(x)[, :768]
+        x = self.backbone(x)[:, :768]
         x = self.linear_classifier(x)
         return x
 
