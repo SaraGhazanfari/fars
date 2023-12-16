@@ -168,11 +168,11 @@ class LinearEvaluation:
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
 
-            for idx, one_output in enumerate(output):
-                if torch.argmax(one_output) == target[idx]:
+            for local_idx, one_output in enumerate(output):
+                if torch.argmax(one_output) == target[local_idx]:
                     correct_counts += 1
                     margin_dict = {k: v + 1 for k, v in margin_dict.items() if
-                                   (one_output[target[idx]] / norm_w) > float(k)}
+                                   (one_output[target[local_idx]] / norm_w) > float(k)}
 
             total += inp.shape[0]
             if idx % 20 == 19:
