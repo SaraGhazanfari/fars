@@ -14,6 +14,7 @@ from fars.core.models.non_lip.model import LinearClassifier
 
 
 def r_sparsemax(z, r=1):
+    z = z.cpu().numpy()
     sum_all_z = sum(z)
     z_sorted = sorted(z, reverse=True)
     k = np.arange(len(z))
@@ -22,7 +23,8 @@ def r_sparsemax(z, r=1):
     k_selected = k_array > z_cumsum
     k_max = np.where(k_selected)[0].max() + 1
     threshold = (z_cumsum[k_max - 1] - r) / k_max
-    return np.maximum(z - threshold, 0)
+    p = np.maximum(z - threshold, 0)
+    return torch.from_numpy(p).cuda()
 
 
 class LinearEvaluation:
