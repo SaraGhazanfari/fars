@@ -175,7 +175,6 @@ class LinearEvaluation:
                         if one_output[target[local_idx]] / norm_w > float(k):
                             margin_dict[k] = v + 1
 
-            print(margin_dict)
             total += inp.shape[0]
             if idx % 20 == 19:
                 print(
