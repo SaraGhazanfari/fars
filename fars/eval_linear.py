@@ -155,8 +155,9 @@ class LinearEvaluation:
         self.linear_classifier.eval()
         correct_counts = 0
         total = 0
+        margin_dict = {'0.05': 0, '0.1': 0, '0.2': 0, '0.3': 0, '0.4': 0, '0.5': 0}
         norm_w = torch.linalg.matrix_norm(self.linear_classifier._modules['module'].linear.weight, ord=2)
-        print(norm_w)
+
         for idx, (inp, target) in enumerate(self.val_loader):
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
@@ -168,11 +169,15 @@ class LinearEvaluation:
             loss = nn.CrossEntropyLoss()(output, target)
 
             for one_output in output:
-                temp_scores = torch.sort(one_output, descending=True)[0]
-                print((temp_scores[0])/norm_w)
-            correct_counts += sum(torch.argmax(output, dim=1) == target).item()
+                if torch.argmax(one_output) == target:
+                    correct_counts += 1
+                    margin_dict = {k: v + 1 for k, v in margin_dict.items() if (one_output[target] / norm_w) > float(k)}
+
             total += inp.shape[0]
             if idx % 20 == 19:
                 print(
                     f'Iteration: {idx + 1}/{len(self.val_loader)}, acc: {round(correct_counts / total, 4)}')
+                print(margin_dict)
+
         print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
+        print(margin_dict)
