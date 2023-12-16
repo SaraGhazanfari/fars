@@ -6,11 +6,23 @@ import torch.backends.cudnn as cudnn
 from torch import nn
 from torch.nn import DataParallel
 from tqdm import tqdm
-
+import numpy as np
 from fars.core import utils
 from fars.core.data.readers import readers_config
 from fars.core.models.l2_lip.model import L2LipschitzNetwork, NormalizedModel
 from fars.core.models.non_lip.model import LinearClassifier
+
+
+def sparsemax(z):
+    sum_all_z = sum(z)
+    z_sorted = sorted(z, reverse=True)
+    k = np.arange(len(z))
+    k_array = 1 + k * z_sorted
+    z_cumsum = np.cumsum(z_sorted) - z_sorted
+    k_selected = k_array > z_cumsum
+    k_max = np.where(k_selected)[0].max() + 1
+    threshold = (z_cumsum[k_max - 1] - 1) / k_max
+    return np.maximum(z - threshold, 0)
 
 
 class LinearEvaluation:
@@ -170,9 +182,11 @@ class LinearEvaluation:
 
             for local_idx, one_output in enumerate(output):
                 if torch.argmax(one_output) == target[local_idx]:
+                    sorted_output = torch.sort(one_output)[0]
                     correct_counts += 1
+                    margin = (sorted_output[0] - sorted_output[1]) / norm_w
                     for k, v in margin_dict.items():
-                        if one_output[target[local_idx]] / norm_w > float(k):
+                        if margin > float(k):
                             margin_dict[k] = v + 1
 
             total += inp.shape[0]
@@ -182,4 +196,4 @@ class LinearEvaluation:
                 print(margin_dict)
 
         print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
-        print({k: v/total for k, v in margin_dict.items()})
+        print({k: v / total for k, v in margin_dict.items()})
