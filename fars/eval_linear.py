@@ -155,7 +155,7 @@ class LinearEvaluation:
         self.linear_classifier.eval()
         correct_counts = 0
         total = 0
-        norm_w = torch.linalg.matrix_norm(self.linear_classifier._modules['module'].linear.weight, p=2)
+        norm_w = torch.linalg.matrix_norm(self.linear_classifier._modules['module'].linear.weight, ord=2)
         print(norm_w)
         for idx, (inp, target) in enumerate(self.val_loader):
             inp = inp.cuda(non_blocking=True)
