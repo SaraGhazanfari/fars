@@ -182,4 +182,4 @@ class LinearEvaluation:
                 print(margin_dict)
 
         print(f'Total Acc on val data: {round(correct_counts / total, 4)}')
-        print(margin_dict)
+        print({k: v/total for k, v in margin_dict.items()})
