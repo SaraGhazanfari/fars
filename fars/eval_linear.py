@@ -155,6 +155,8 @@ class LinearEvaluation:
         self.linear_classifier.eval()
         correct_counts = 0
         total = 0
+        norm_w = torch.norm(self.linear_classifier._modules['module'].linear.weight, p='fro')
+        print(norm_w)
         for idx, (inp, target) in enumerate(self.val_loader):
             inp = inp.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
@@ -164,10 +166,10 @@ class LinearEvaluation:
                 output = self.model(inp)[:, :768]
             output = self.linear_classifier(output)
             loss = nn.CrossEntropyLoss()(output, target)
-            print(self.linear_classifier._modules['module'].linear.weight.shape)
+
             for one_output in output:
                 temp_scores = torch.sort(one_output, descending=True)[0]
-                print(temp_scores[0]-temp_scores[1])
+                print((temp_scores[0] - temp_scores[1])/norm_w)
             correct_counts += sum(torch.argmax(output, dim=1) == target).item()
             total += inp.shape[0]
             if idx % 20 == 19:
